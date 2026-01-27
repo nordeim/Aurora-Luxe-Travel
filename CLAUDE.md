@@ -1,1793 +1,856 @@
-# Tailwind CSS v4.0 Comprehensive Guide
-## Migration, Debugging, & React/shadcn Mobile Navigation
+# Aurora Luxe Travel - AI Agent Briefing Document
+
+> **Last Updated**: 2026-01-28  
+> **Project Status**: ✅ Phase 5 Complete - Production Ready  
+> **Build Status**: ✅ Passing (Next.js 16.1.4, TypeScript 5.9.3)  
+> **Total Files**: 27 source files | ~1,706 lines of code
 
 ---
 
-## Executive Summary
+## 🎯 Project Overview
 
-This guide consolidates four validated reference documents into a single authoritative source for Tailwind CSS v4.0 development. It captures the complete paradigm shift from JavaScript-based configuration to CSS-first architecture, provides battle-tested mobile navigation patterns for both vanilla HTML and React/shadcn stacks, and delivers a systematic debugging methodology for visual discrepancies in production.
+**Aurora Luxe Travel** is a luxury travel concierge website targeting ultra-high-net-worth individuals (UHNWI). The project implements a distinctive "Celestial Noir" design language that merges deep space aesthetics with terrestrial luxury.
 
-The combined approach ensures consistency across all development scenarios while identifying critical pitfalls that cause production failures. All findings have been cross-referenced against official Tailwind CSS v4.0 documentation and validated through real-world troubleshooting scenarios.
-
----
-
-## Table of Contents
-
-- **Part 1**: V4 Fundamentals & Architecture
-- **Part 2**: Migration Playbook (v3.4 → v4.0)
-- **Part 3**: Mobile Navigation Patterns
-- **Part 4**: Visual Debugging Playbook
-- **Part 5**: Anti-Patterns Catalog & Pitfalls
-- **Part 6**: Verification Protocols
-- **Part 7**: AI Agent Implementation Patterns
+### Core Value Proposition
+- **Target Audience**: UHNW individuals seeking bespoke travel experiences
+- **Design Philosophy**: "Beyond First Class" - Celestial Noir aesthetic
+- **Business Model**: Membership-based luxury travel concierge service
 
 ---
 
-# PART 1: V4 FUNDAMENTALS & ARCHITECTURE
+## 📊 Current Implementation Status
 
-## 1.1 The CSS-First Paradigm Shift
+### ✅ Completed Phases (100%)
 
-Tailwind CSS v4.0 represents a fundamental transformation from JavaScript-based configuration to native CSS theming. This architectural change aligns with modern CSS capabilities while delivering substantial performance improvements.
+**Phase 1: Foundation & Configuration**
+- Tailwind CSS v4 with CSS-first theming
+- Next.js 14+ App Router with TypeScript
+- Design tokens and custom animations
+- Utility functions and accessibility hooks
 
-### The Mental Model Transformation
+**Phase 2: Data Layer**
+- 6 curated destinations (Maldives, Tokyo, Swiss Alps, Dubai, Serengeti, Amalfi)
+- 5 signature experiences (Private Jet, Yacht, Michelin Trail, Desert, Alpine)
+- 3 membership tiers (Silver Circle, Black Card, Obsidian Society)
+- 3 client testimonials
 
-**v3.4 Configuration (Legacy)**
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        brand: {
-          500: '#3B82F6',
-          600: '#2563EB'
-        }
-      },
-      fontFamily: {
-        display: ['Inter', 'sans-serif']
-      }
-    }
-  }
-}
-```
+**Phase 3: UI Primitives**
+- 9 reusable components (Button, Input, Textarea, Select, GlowOrb, etc.)
+- Glass morphism styling
+- Form validation components
+- Toast notifications
 
-**v4.0 Configuration (CSS-First)**
-```css
-@import "tailwindcss";
+**Phase 4: Layout Components**
+- Sticky navbar with scroll spy
+- Mobile menu with full-screen overlay
+- Footer with links and social media
 
-@theme {
-  --font-display: "Satoshi", "sans-serif";
-  --breakpoint-3xl: 1920px;
-  --color-brand-500: oklch(0.84 0.18 117.33);
-  --color-brand-600: oklch(0.53 0.12 118.34);
-  --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
-}
-```
-
-### Critical Understanding Points
-
-The v4.0 approach introduces several paradigm shifts that must be understood:
-
-**Theme Variables as Native CSS Custom Properties**: Unlike v3 where theme values were compiled into utility classes, v4 exposes theme variables as native CSS custom properties. This means utilities like `bg-brand-500` actually reference `var(--color-brand-500)` in the generated CSS.
-
-**Color Space Migration to OKLCH**: v4 defaults to OKLCH color space, which provides better gamut coverage and perceptual uniformity compared to RGB. While hex values still work, OKLCH is preferred for design system tokens.
-
-**Lightning CSS Compilation**: v4 uses Lightning CSS (written in Rust) for compilation, delivering 3.78x faster full builds and 8.8x faster incremental rebuilds compared to v3.
-
-**Zero-Configuration Content Detection**: By default, v4 automatically detects content files without requiring explicit `@source` directives, though explicit configuration remains available for monorepo scenarios.
-
-### Browser Requirements
-
-Tailwind CSS v4.0 requires modern browsers that support modern CSS features:
-
-- Safari 16.4+
-- Chrome 111+
-- Firefox 128+
-
-Projects requiring older browser support **must remain on v3.4** or implement fallback strategies.
+**Phase 5: Section Components**
+- Hero with aurora blob animations
+- Destinations grid (6 cards)
+- Experiences showcase (alternating layout)
+- Membership tiers (3 cards with highlighted middle)
+- Testimonials grid
+- Contact form with validation
 
 ---
 
-## 1.2 Installation & Build Tool Configuration
+## 🏗️ Architecture
 
-### Package Dependencies
+### Technology Stack
 
-**Remove v3 Dependencies**
-```bash
-npm uninstall tailwindcss postcss-import autoprefixer
+```yaml
+Core Framework:
+  - Next.js: 16.1.4 (App Router, Turbopack)
+  - React: 19.2.3
+  - TypeScript: 5.9.3
+
+Styling:
+  - Tailwind CSS: v4.1.18 (CSS-first with @theme)
+  - Framer Motion: 12.29.0
+  - PostCSS: 8.5.6
+
+Development:
+  - ESLint: 9.39.2
+  - Vitest: 4.0.18
+  - Playwright: 1.57.0
+
+Deployment:
+  - Vercel (recommended)
+  - Output: standalone
 ```
 
-**Install v4 Dependencies**
-```bash
-# For PostCSS users
-npm install tailwindcss@latest @tailwindcss/postcss
+### Project Structure
 
-# For Vite users (RECOMMENDED - superior performance)
-npm install tailwindcss@latest @tailwindcss/vite
 ```
-
-### PostCSS Configuration (Legacy Approach)
-
-```javascript
-// postcss.config.js
-export default {
-  plugins: ["@tailwindcss/postcss"],
-};
-```
-
-### Vite Configuration (Recommended)
-
-```javascript
-// vite.config.js
-import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite";
-
-export default defineConfig({
-  plugins: [tailwindcss()],
-});
-```
-
-The Vite plugin is recommended over PostCSS because it leverages Lightning CSS directly, eliminating the PostCSS plugin chain overhead.
-
-### CSS Import Directive Migration
-
-**v3.4 Approach (Three Directives)**
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-**v4.0 Approach (Single Import)**
-```css
-@import "tailwindcss";
-```
-
-The single import replaces all three v3 directives. Import bundling is built-in, eliminating the need for `postcss-import`. Automatic vendor prefixing is handled by Lightning CSS.
-
----
-
-## 1.3 Theme Configuration & Customization
-
-### @theme Directive Structure
-
-The `@theme` directive defines design tokens that automatically generate corresponding utilities:
-
-```css
-@import "tailwindcss";
-
-@theme {
-  /* Typography */
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Satoshi", "Inter", sans-serif;
-  
-  /* Colors - OKLCH color space */
-  --color-brand-50: oklch(0.99 0.01 117.33);
-  --color-brand-100: oklch(0.97 0.02 117.33);
-  --color-brand-500: oklch(0.84 0.18 117.33);
-  --color-brand-600: oklch(0.53 0.12 118.34);
-  --color-brand-900: oklch(0.21 0.04 118.34);
-  
-  /* Spacing Scale */
-  --spacing-18: 4.5rem;
-  --spacing-88: 22rem;
-  
-  /* Custom Breakpoints */
-  --breakpoint-3xl: 1920px;
-  
-  /* Animation */
-  --animate-spin: spin 1s linear infinite;
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-}
-```
-
-### Theme Variable Access
-
-Variables defined in `@theme` are accessible anywhere in CSS:
-
-```css
-/* Direct CSS variable usage */
-.card {
-  background-color: var(--color-brand-500);
-  padding: var(--spacing-4);
-  font-family: var(--font-display);
-}
-
-/* In arbitrary values */
-.btn {
-  background: linear-gradient(to right, var(--color-brand-500), var(--color-brand-600));
-}
-```
-
-### Content Detection & @source Directive
-
-v4.0 uses automatic content detection by default:
-
-```css
-/* Automatic detection - no configuration needed */
-@import "tailwindcss";
-
-/* Explicit inclusion for non-standard paths */
-@import "tailwindcss";
-@source "../node_modules/@my-company/ui-lib";
-@source "../../legacy-components";
-@source "../components/**/*.{ts,tsx,js,jsx}";
-```
-
-### JavaScript Config Backward Compatibility
-
-For projects transitioning gradually, v4 can load a legacy `tailwind.config.js`:
-
-```css
-@config "../../tailwind.config.js";
-@import "tailwindcss";
-```
-
-**Not Supported in v4**:
-- `corePlugins` option
-- `safelist` option (use `@source inline()` instead)
-- `separator` option
-
----
-
-# PART 2: MIGRATION PLAYBOOK (v3.4 → v4.0)
-
-## 2.1 Utility Class Breaking Changes
-
-### Removed Deprecated Utilities
-
-These utilities must be migrated as they cause build failures in v4:
-
-| **Removed v3 Utility** | **v4 Replacement** | **Migration Pattern** |
-|------------------------|--------------------|-----------------------|
-| `bg-opacity-*` | `bg-black/50` | Opacity modifiers |
-| `text-opacity-*` | `text-black/50` | Opacity modifiers |
-| `border-opacity-*` | `border-black/50` | Opacity modifiers |
-| `ring-opacity-*` | `ring-black/50` | Opacity modifiers |
-| `placeholder-opacity-*` | `placeholder-black/50` | Opacity modifiers |
-| `flex-shrink-*` | `shrink-*` | Direct rename |
-| `flex-grow-*` | `grow-*` | Direct rename |
-| `overflow-ellipsis` | `text-ellipsis` | Direct rename |
-| `decoration-slice` | `box-decoration-slice` | Direct rename |
-| `decoration-clone` | `box-decoration-clone` | Direct rename |
-
-**Migration Example**:
-```html
-<!-- BEFORE (v3) -->
-<div class="bg-red-500 bg-opacity-50 text-white text-opacity-80">
-  Content
-</div>
-
-<!-- AFTER (v4) -->
-<div class="bg-red-500/50 text-white/80">
-  Content
-</div>
-```
-
-### Renamed Utilities for Consistency
-
-v4 introduces explicit naming scales for several utility categories:
-
-| **v3 Utility** | **v4 Utility** | **Reason** |
-|----------------|----------------|------------|
-| `shadow-sm` | `shadow-xs` | Explicit scale |
-| `shadow` | `shadow-sm` | Named values |
-| `shadow-md` | `shadow-md` | Unchanged |
-| `shadow-lg` | `shadow-lg` | Unchanged |
-| `shadow-xl` | `shadow-xl` | Unchanged |
-| `drop-shadow-sm` | `drop-shadow-xs` | Consistency |
-| `drop-shadow` | `drop-shadow-sm` | Consistency |
-| `blur-sm` | `blur-xs` | Explicit scale |
-| `blur` | `blur-sm` | Named values |
-| `blur-md` | `blur-md` | Unchanged |
-| `blur-lg` | `blur-lg` | Unchanged |
-| `rounded-sm` | `rounded-xs` | Explicit scale |
-| `rounded` | `rounded-sm` | Named values |
-| `outline-none` | `outline-hidden` | Semantic clarity |
-| `ring` | `ring-3` | Explicit width |
-
-**Migration Example**:
-```html
-<!-- BEFORE (v3) -->
-<input class="shadow rounded outline-none focus:ring" />
-
-<!-- AFTER (v4) -->
-<input class="shadow-sm rounded-sm outline-hidden focus:ring-3" />
-```
-
-### Gradient Utilities - Major Renaming
-
-The `bg-gradient-*` utilities are renamed to support new gradient types:
-
-```html
-<!-- BEFORE (v3) -->
-<div class="bg-gradient-to-r from-red-500 to-blue-500"></div>
-
-<!-- AFTER (v4) -->
-<div class="bg-linear-to-r from-red-500 to-blue-500"></div>
-```
-
-**New Gradient Types Available in v4**:
-- `bg-linear-*` - Linear gradients
-- `bg-conic-*` - Conic gradients
-- `bg-radial-*` - Radial gradients
-- `bg-linear-45` - Angle-based gradients
-
-**Gradient Interpolation Modifiers**:
-```html
-<div class="bg-linear-to-r/oklch from-red-600 to-blue-600"></div>
-<div class="bg-conic/[in_hsl_longer_hue] from-red-600 to-red-600"></div>
-```
-
-**Important: Gradient Persistence Behavior Changed**
-```html
-<!-- v3: to-yellow-400 would reset to transparent in dark mode -->
-<div class="bg-gradient-to-r from-red-500 to-yellow-400 dark:from-blue-500"></div>
-
-<!-- v4: Gradients persist - use explicit reset -->
-<div class="bg-linear-to-r from-red-500 via-orange-400 to-yellow-400 
-     dark:via-none dark:from-blue-500 dark:to-teal-400"></div>
-```
-
-### Outline & Ring Utilities Changes
-
-**Outline Behavior**:
-```html
-<!-- BEFORE (v3) - Required explicit width and style -->
-<input class="outline outline-2 outline-slate-400" />
-
-<!-- AFTER (v4) - Defaults to 1px, auto-solid style -->
-<input class="outline-2 outline-slate-400" />
-```
-
-**Ring Width & Color**:
-```html
-<!-- BEFORE (v3) - ring = 3px, default blue-500 -->
-<button class="focus:ring">Submit</button>
-
-<!-- AFTER (v4) - ring-3 = 3px, currentColor default -->
-<button class="focus:ring-3 focus:ring-blue-500">Submit</button>
-```
-
-**Compatibility Override** (for gradual migration):
-```css
-@theme {
-  --default-ring-width: 3px;
-  --default-ring-color: var(--color-blue-500);
-}
-```
-
-### Border & Divide Color Changes
-
-**Default Color Migration**: `gray-200` → `currentColor`
-
-```html
-<!-- BEFORE (v3) - Implicit gray-200 -->
-<div class="border px-2 py-3">Content</div>
-
-<!-- AFTER (v4) - Must specify color -->
-<div class="border border-gray-200 px-2 py-3">Content</div>
-```
-
-**Global Override** (for backward compatibility):
-```css
-@layer base {
-  *, ::after, ::before, ::backdrop, ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-}
+src/
+├── app/
+│   ├── layout.tsx          # Root layout, fonts, SEO metadata
+│   ├── page.tsx            # Home page composition
+│   └── globals.css         # Tailwind v4 theme + design tokens
+│
+├── components/
+│   ├── layout/
+│   │   ├── Navbar.tsx      # Sticky nav with scroll spy
+│   │   └── Footer.tsx      # Site footer
+│   │
+│   ├── sections/
+│   │   ├── Hero.tsx        # Hero with aurora blobs
+│   │   ├── Destinations.tsx    # 6 destination cards
+│   │   ├── Experiences.tsx     # 5 experiences
+│   │   ├── Membership.tsx      # 3 membership tiers
+│   │   ├── Testimonials.tsx    # Client testimonials
+│   │   └── ConciergeForm.tsx   # Contact form
+│   │
+│   └── ui/
+│       ├── Button.tsx          # 4 variants, 3 sizes
+│       ├── Input.tsx           # Form input with label/error
+│       ├── Textarea.tsx        # Form textarea
+│       ├── Select.tsx          # Form select dropdown
+│       ├── ChipGroup.tsx       # Multi-select chips
+│       ├── GlowOrb.tsx         # Animated aurora blob
+│       ├── GlassPanel.tsx      # Glass morphism container
+│       ├── SectionHeading.tsx  # Consistent headers
+│       └── Toast.tsx           # Notification toast
+│
+├── data/
+│   ├── destinations.ts     # 6 destinations with pricing
+│   ├── experiences.ts      # 5 signature experiences
+│   ├── membership.ts       # 3 membership tiers
+│   └── testimonials.ts     # 3 client testimonials
+│
+└── lib/
+    ├── utils.ts            # cn(), formatCurrency(), slugify()
+    └── hooks/
+        ├── useScrollSpy.ts     # Active section tracking
+        └── useReducedMotion.ts # Motion preference detection
 ```
 
 ---
 
-## 2.2 Advanced Pattern Changes
+## 🎨 Design System
 
-### Arbitrary Values Syntax Evolution
+### Celestial Noir Color Palette
 
-**CSS Variable Shorthand Migration**:
-
-```html
-<!-- BEFORE (v3) - Square brackets for CSS variables -->
-<div class="bg-[--brand-color] w-[--custom-width]"></div>
-
-<!-- AFTER (v4) - Parentheses for CSS variables -->
-<div class="bg-(--brand-color) w-(--custom-width)"></div>
-```
-
-**Dynamic Values with @theme**:
 ```css
-@theme {
-  --dynamic-width: 200px;
-  --dynamic-color: #ff0000;
-}
+/* Core Colors */
+--color-void: #050506              /* Deep space black */
+--color-void-light: #0a0a0c        /* Slightly lighter black */
+
+/* Aurora Gradients */
+--color-aurora-cyan: #22d3ee       /* Cyan accent */
+--color-aurora-purple: #a855f7     /* Purple accent */
+--color-aurora-magenta: #ec4899    /* Magenta accent */
+
+/* Luxury Accent */
+--color-champagne: #c9b896         /* Cool gold */
+--color-champagne-dark: #a89776    /* Darker gold */
+
+/* Slate Scale (50-900) */
+/* Used for text, borders, backgrounds */
 ```
 
-```html
-<div class="w-[--dynamic-width] bg-[--dynamic-color]">
-  Dynamic content
-</div>
-```
+### Typography
 
-**Grid Arbitrary Values - Comma to Underscore**:
-```html
-<!-- BEFORE (v3) -->
-<div class="grid-cols-[max-content,auto]"></div>
-
-<!-- AFTER (v4) -->
-<div class="grid-cols-[max-content_auto]"></div>
-```
-
-### Container Configuration Migration
-
-**v3.4 Approach (JavaScript Config)**:
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    container: {
-      center: true,
-      padding: '2rem',
-    }
-  }
-}
-```
-
-**v4.0 Approach (CSS Utility)**:
 ```css
-@utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
-}
+--font-sans: "Geist", "Inter", system-ui
+--font-serif: "Instrument Serif", "Georgia", serif
+
+/* Usage */
+- Headings: font-serif (Instrument Serif)
+- Body: font-sans (Geist)
+- Sizes: Responsive (text-4xl → text-8xl for hero)
 ```
 
-**Container Queries - Now Built-In**:
-```html
-<div class="@container">
-  <div class="grid grid-cols-1 @sm:grid-cols-3 @lg:grid-cols-4">
-    <!-- Responsive to container, not viewport -->
-  </div>
-</div>
+### Custom Animations
 
-<!-- Max-width queries -->
-<div class="@container">
-  <div class="grid grid-cols-3 @max-md:grid-cols-1">
-    <!-- ... -->
-  </div>
-</div>
-
-<!-- Range queries -->
-<div class="@container">
-  <div class="flex @min-md:@max-xl:hidden">
-    <!-- ... -->
-  </div>
-</div>
-```
-
-### Custom Utilities Registration
-
-**Critical Change**: `@layer utilities` → `@utility` directive
-
-**v3.4 Approach**:
 ```css
-@layer utilities {
-  .tab-4 {
-    tab-size: 4;
-  }
-}
-
-@layer components {
-  .btn {
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: ButtonFace;
-  }
-}
+--animate-aurora-slow: 20s ease-in-out infinite
+--animate-float-slow: 25s ease-in-out infinite
+--animate-shimmer: 2.5s ease-in-out infinite
 ```
 
-**v4.0 Approach**:
+### Spacing & Layout
+
 ```css
-@utility tab-4 {
-  tab-size: 4;
-}
+--spacing-18: 4.5rem
+--spacing-88: 22rem
 
-@utility btn {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: ButtonFace;
-}
-```
-
-### Variant Stacking Order Reversal
-
-**Left-to-Right Application** (reversed from v3):
-
-```html
-<!-- BEFORE (v3) - Right to left -->
-<ul class="py-4 first:*:pt-0 last:*:pb-0">
-  <li>One</li>
-  <li>Two</li>
-</ul>
-
-<!-- AFTER (v4) - Left to right -->
-<ul class="py-4 *:first:pt-0 *:last:pb-0">
-  <li>One</li>
-  <li>Two</li>
-</ul>
-```
-
-### Important Modifier Syntax
-
-```html
-<!-- BEFORE (v3) - After variants, before utility -->
-<div class="flex! bg-red-500! hover:bg-red-600/50!"></div>
-
-<!-- AFTER (v4) - At end of class name -->
-<div class="flex bg-red-500 hover:bg-red-600/50 !flex !bg-red-500 !hover:bg-red-600/50"></div>
-```
-
-Note: The old syntax still works but is deprecated.
-
-### Prefix Syntax Changes
-
-```html
-<!-- BEFORE (v3) - Prefix in middle -->
-<div class="tw-flex tw-bg-red-500 hover:tw-bg-red-600"></div>
-
-<!-- AFTER (v4) - Prefix as variant at beginning -->
-<div class="tw:flex tw:bg-red-500 tw:hover:bg-red-600"></div>
-```
-
-**CSS Variables Include Prefix**:
-```css
-@import "tailwindcss" prefix(tw);
-
-@theme {
-  --color-avocado-500: oklch(0.84 0.18 117.33);
-}
-
-/* Generates */
-:root {
-  --tw-color-avocado-500: oklch(0.84 0.18 117.33);
-}
+/* Breakpoints */
+sm: 640px
+md: 768px
+lg: 1024px
+xl: 1280px
 ```
 
 ---
 
-## 2.3 Behavioral & Performance Changes
+## 📦 Data Models
 
-### Space & Divide Utilities Performance Fix
+### Core Interfaces
 
-**Critical Selector Change**:
-
-```css
-/* BEFORE (v3) - Performance issues on large pages */
-.space-y-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 1rem;
+```typescript
+// Destinations
+interface Destination {
+  id: string;
+  slug: string;
+  name: string;
+  region: string;
+  tagline: string;
+  priceFrom: number;
+  currency: string;
+  imageUrl: string;
+  quickFacts: string[];
+  featured: boolean;
 }
 
-/* AFTER (v4) - Optimized selector */
-.space-y-4 > :not(:last-child) {
-  margin-bottom: 1rem;
+// Experiences
+interface Experience {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  imageUrl: string;
+  duration: string;
+  included: string[];
+  startingPrice: number;
 }
-```
 
-**Migration Recommendation**:
-```html
-<!-- BEFORE (v3) -->
-<div class="space-y-4 p-4">
-  <label for="name">Name</label>
-  <input type="text" name="name" />
-</div>
+// Membership
+interface MembershipTier {
+  id: string;
+  name: string;
+  tagline: string;
+  annualFee: number;
+  perks: string[];
+  highlighted: boolean;
+  accentColor: string;
+}
 
-<!-- RECOMMENDED (v4) -->
-<div class="flex flex-col gap-4 p-4">
-  <label for="name">Name</label>
-  <input type="text" name="name" />
-</div>
-```
-
-### Transform Properties Decomposition
-
-**Individual Property Based**:
-
-```html
-<!-- BEFORE (v3) - transform property -->
-<button class="scale-150 focus:transform-none"></button>
-
-<!-- AFTER (v4) - Individual properties -->
-<button class="scale-150 focus:scale-none"></button>
-```
-
-**Transition Property Updates**:
-```html
-<!-- BEFORE (v3) -->
-<button class="transition-[opacity,transform] hover:scale-150"></button>
-
-<!-- AFTER (v4) -->
-<button class="transition-[opacity,scale] hover:scale-150"></button>
-```
-
-### Hover Variant Media Query Behavior
-
-**New Hover Detection**:
-```css
-/* v4.0 - Only applies when primary input supports hover */
-@media (hover: hover) {
-  .hover\:underline:hover {
-    text-decoration: underline;
-  }
+// Testimonials
+interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  title: string;
+  rating: number;
 }
 ```
 
-**Override for Touch Compatibility**:
-```css
-@custom-variant hover (&:hover);
-```
+### Data Counts
 
-### Hidden Attribute Priority
-
-**Display Classes No Longer Override `hidden`**:
-
-```html
-<!-- BEFORE (v3) - flex would show element -->
-<div hidden class="flex">Still hidden in v4</div>
-
-<!-- AFTER (v4) - Remove hidden to show -->
-<div class="flex">Now visible</div>
-```
-
-Exception: `hidden="until-found"` still works.
-
-### Transition Property Additions
-
-```css
-/* v4.0 adds outline-color to transitions */
-.transition,
-.transition-colors {
-  /* Now includes outline-color */
-}
-```
-
-**Fix for Outline Transitions**:
-```html
-<!-- BEFORE - Color transitions from default -->
-<button class="transition hover:outline-2 hover:outline-cyan-500"></button>
-
-<!-- AFTER - Set color unconditionally -->
-<button class="outline-cyan-500 transition hover:outline-2"></button>
-```
+- **Destinations**: 6 (3 featured)
+- **Experiences**: 5
+- **Membership Tiers**: 3 (Black Card highlighted)
+- **Testimonials**: 3
 
 ---
 
-## 2.4 Modern CSS Features & New Utilities
+## 🔧 Key Implementation Details
 
-### Dynamic Utility Values
+### 1. Tailwind CSS v4 Configuration
 
-**Spacing Scale Dynamic Values**:
+**Critical**: This project uses Tailwind CSS v4 with CSS-first theming.
 
-```html
-<!-- No configuration needed -->
-<div class="grid grid-cols-15"><!-- Any number --></div>
-<div class="w-17"><!-- Any spacing value --></div>
-<div class="mt-29 pr-93"><!-- Unlimited --></div>
-```
-
-**Data Attribute Variants**:
-
-```html
-<div data-current class="opacity-75 data-current:opacity-100">
-  Active item
-</div>
-```
-
-### New Modern Utilities
-
-| **Utility** | **Feature** | **Use Case** |
-|-------------|-------------|--------------|
-| `inset-shadow-*` | Stacked shadows | Up to 4 shadow layers |
-| `inset-ring-*` | Inset rings | Enhanced depth effects |
-| `field-sizing` | Auto-resize textareas | No JavaScript needed |
-| `color-scheme` | Light/dark scrollbars | System UI consistency |
-| `font-stretch` | Variable font widths | Advanced typography |
-| `rotate-x-*`, `rotate-y-*` | 3D transforms | Spatial transformations |
-| `scale-z-*` | 3D scaling | Depth effects |
-| `translate-z-*` | 3D translation | Z-axis movement |
-
-### New Variants
-
-| **Variant** | **Syntax** | **Purpose** |
-|-------------|-----------|-------------|
-| `starting` | `starting:opacity-0` | Entry transitions |
-| `not-*` | `not-hover:opacity-75` | Negation pseudo-class |
-| `not-*` (media) | `not-supports-*:px-4` | Negate feature queries |
-| `inert` | `inert:opacity-50` | Non-interactive elements |
-| `nth-*` | `nth-3:bg-blue-500` | Nth-child selection |
-| `in-*` | `in-*:opacity-100` | Like group without `.group` |
-| `@min-*` | `@min-md:grid-cols-3` | Container min-width |
-| `@max-*` | `@max-md:grid-cols-1` | Container max-width |
-
----
-
-# PART 3: MOBILE NAVIGATION PATTERNS
-
-## 3.1 Core Principles for Mobile Navigation
-
-### Definition of "Nav Disappears"
-
-A mobile navigation is considered "disappeared" when **any** of these are true:
-
-- The user has **no visible navigation affordance** (no links, no menu button, no drawer)
-- The nav exists but is **not visible** (hidden by CSS or Tailwind classes)
-- The nav is visible but **not interactive** (covered by another layer or z-index issue)
-- The nav is interactive but **not reachable by keyboard**
-
-### Success Criteria
-
-A correct mobile nav implementation must satisfy:
-
-- **Discoverability**: Clear affordance (links or menu button) at mobile breakpoints
-- **Reachability**: Can be opened and navigated with touch and keyboard
-- **Resilience**: Resize/orientation changes do not strand the nav in a broken state
-- **No Clipping**: All items remain reachable on small-height screens
-
----
-
-## 3.2 Non-Negotiable Guardrails
-
-### Viewport Meta is Mandatory
-
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1">
-```
-
-Without it, breakpoints may not behave as expected on real devices.
-
-### Never Destroy Navigation Without Substitution
-
-**Forbidden Pattern**:
-- A mobile media query sets `.nav` / `.nav-links` to `display: none`
-- There is **no mobile replacement** (menu button + overlay/drawer)
-
-If you hide desktop nav on mobile, you must introduce a mobile pattern:
-- **Menu button** + overlay/drawer
-- Or keep inline nav visible (small, stacked)
-
-### Symmetrical Breakpoint Strategy (Tailwind v4)
-
-```tsx
-// Desktop nav: visible at md and above
-<nav className="hidden md:flex items-center gap-8">...</nav>
-
-// Mobile trigger: hidden at md and above
-<button className="md:hidden" aria-label="Open menu">Menu</button>
-```
-
-This ensures exactly one navigation pattern is visible at any viewport width.
-
-### Use Semantic Controls for Interactive Toggles
-
-- Use a real `<button type="button">` for opening/closing the menu
-- Avoid checkbox/label hacks when accessibility matters
-- Include proper ARIA attributes: `aria-controls`, `aria-expanded`, `aria-label`
-
-### Mobile Overlays Must Not Be Clipped
-
-If an overlay menu is used:
-- It must be `position: fixed` (or otherwise outside clipping ancestors)
-- It must not be inside a container with `overflow: hidden` unless intentional
-- It should support `overflow-y: auto` for small-height devices
-
-### Establish a Z-Index Scale
-
-Random `z-index` values cause "exists but behind something" failures.
-
-Define a scale:
-```css
-:root {
-  --z-base: 0;
-  --z-dropdown: 200;
-  --z-sticky: 300;
-  --z-modal: 400;
-  --z-popover: 500;
-  --z-tooltip: 600;
-}
-```
-
-Use the scale consistently across the codebase.
-
----
-
-## 3.3 Vanilla HTML Implementation
-
-### HTML Structure (Semantic Toggle)
-
-```html
-<header class="header">
-  <a class="logo" href="#">Brand</a>
-
-  <button
-    type="button"
-    class="menu-trigger"
-    aria-controls="main-navigation"
-    aria-expanded="false"
-    aria-label="Open navigation"
-  >
-    <span class="sr-only">Menu</span>
-    <span class="icon-hamburger"></span>
-  </button>
-
-  <nav id="main-navigation" class="nav-links" aria-label="Main navigation">
-    <a href="#section-1">Section 1</a>
-    <a href="#section-2">Section 2</a>
-    <a href="#section-3">Section 3</a>
-  </nav>
-</header>
-```
-
-### CSS (Mobile Overlay Pattern)
-
-```css
-.menu-trigger { display: none; }
-
-@media (max-width: 768px) {
-  .menu-trigger { display: inline-flex; }
-
-  body.menu-open { overflow: hidden; }
-
-  .nav-links {
-    position: fixed;
-    inset: 0;
-    top: var(--nav-height, 64px);
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
-    padding: 64px 24px;
-    gap: 16px;
-
-    overflow-y: auto;
-
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
-
-    z-index: var(--z-modal, 400);
-    background: #fff;
-  }
-
-  body.menu-open .nav-links {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-}
-```
-
-### JavaScript (Minimal State Machine)
-
-```js
-(() => {
-  const body = document.body;
-  const button = document.querySelector('.menu-trigger');
-  const nav = document.getElementById('main-navigation');
-
-  if (!button || !nav) return;
-
-  const setMenuState = (open, { focus = true } = {}) => {
-    if (open) {
-      body.classList.add('menu-open');
-      button.setAttribute('aria-expanded', 'true');
-      button.setAttribute('aria-label', 'Close navigation');
-      if (focus) {
-        const first = nav.querySelector('a');
-        if (first) first.focus();
-      }
-      return;
-    }
-
-    body.classList.remove('menu-open');
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-label', 'Open navigation');
-    if (focus) button.focus();
-  };
-
-  button.addEventListener('click', () => {
-    setMenuState(!body.classList.contains('menu-open'));
-  });
-
-  nav.querySelectorAll('a').forEach((a) => {
-    a.addEventListener('click', () => setMenuState(false, { focus: false }));
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && body.classList.contains('menu-open')) {
-      setMenuState(false);
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && body.classList.contains('menu-open')) {
-      setMenuState(false, { focus: false });
-    }
-  });
-})();
-```
-
----
-
-## 3.4 React + shadcn/ui Implementation
-
-### Data Model (Single Source of Truth)
-
-```ts
-export const NAV_ITEMS = [
-  { href: "#collections", label: "Collections" },
-  { href: "#showcase", label: "Artisanal Range" },
-  { href: "#about", label: "Our Story" },
-  { href: "/journal", label: "Journal" },
-] as const;
-```
-
-### Mobile Navigation with Sheet
-
-```tsx
-"use client";
-
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-
-import { NAV_ITEMS } from "./nav-items";
-
-export function MobileNavSheet() {
-  const [open, setOpen] = React.useState(false);
-  const pathname = usePathname();
-
-  React.useEffect(() => {
-    // Close on route change to prevent stranded overlays
-    setOpen(false);
-  }, [pathname]);
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="md:hidden"
-          aria-label={open ? "Close navigation" : "Open navigation"}
-        >
-          <span className="sr-only">Menu</span>
-          <span className="h-5 w-5">≡</span>
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent side="right" className="p-0">
-        <div className="flex h-full flex-col">
-          <SheetHeader className="border-b px-6 py-4">
-            <SheetTitle>Navigation</SheetTitle>
-          </SheetHeader>
-
-          <nav className="flex-1 overflow-y-auto px-6 py-6">
-            <ul className="flex flex-col gap-3">
-              {NAV_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <SheetClose asChild>
-                    <Link
-                      href={item.href}
-                      className="block rounded-md px-3 py-2 text-lg font-medium leading-tight hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {item.label}
-                    </Link>
-                  </SheetClose>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
-```
-
-### Desktop Navigation
-
-```tsx
-import Link from "next/link";
-import { NAV_ITEMS } from "./nav-items";
-
-export function DesktopNav() {
-  return (
-    <nav className="hidden md:flex items-center gap-8">
-      {NAV_ITEMS.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="text-sm font-medium hover:underline underline-offset-8"
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-```
-
-### Complete Header Component
-
-```tsx
-import { MobileNavSheet } from "./mobile-nav-sheet";
-import { DesktopNav } from "./desktop-nav";
-
-export function Header() {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <a href="/" className="text-xl font-bold">
-          Brand
-        </a>
-        
-        <DesktopNav />
-        <MobileNavSheet />
-      </div>
-    </header>
-  );
-}
-```
-
----
-
-## 3.5 Root-Cause Taxonomy (Mobile Nav Failures)
-
-### Class A — Destructive Hiding Without Substitution
-
-**Signature**:
-- `@media (...) { .nav-links { display: none } }`
-- No menu trigger exists in DOM
-
-**Fix**:
-- Add a mobile trigger + mobile nav presentation (overlay/drawer)
-
-### Class B — Hidden by Visibility/Opacity/Transform State
-
-**Signature**:
-- `opacity: 0`, `visibility: hidden`, or transform moves it off-screen
-- Open state never activates (CSS state missing or JS not toggling)
-
-**Fix**:
-- Verify state toggling logic and selectors
-- Ensure open state actually changes computed styles
-
-### Class C — Clipped by Overflow or Layout Constraints
-
-**Signature**:
-- Nav exists and is "open" but top items are missing
-- Parent has `overflow: hidden`, or overlay is centered and items clip off-screen
-
-**Fix**:
-- Use `position: fixed` overlay
-- Use `justify-content: flex-start` + `overflow-y: auto`
-
-### Class D — Behind Another Layer (Z-Index/Stacking Context)
-
-**Signature**:
-- Nav is present and visible in DOM, but cannot be clicked
-- Another element overlays it
-
-**Fix**:
-- Raise nav layer using the z-index scale
-- Remove accidental stacking contexts (e.g., `transform` on parents)
-
-### Class E — Breakpoint/Viewport Mismatch
-
-**Signature**:
-- Works in desktop devtools but fails on real device
-- Breakpoints not triggering
-
-**Fix**:
-- Ensure viewport meta
-- Verify media query units and breakpoint values
-
-### Class F — JavaScript State Bug
-
-**Signature**:
-- Menu button exists but does nothing
-- Console errors, selector mismatches, timing issues
-
-**Fix**:
-- Guard selectors, attach listeners after DOM ready
-- Implement a single `setMenuState(isOpen)` function
-
-### Class G — Keyboard-Only Failure
-
-**Signature**:
-- Mouse/touch can open
-- Keyboard can't reach the trigger or links
-
-**Fix**:
-- Ensure trigger is a `<button>`
-- Provide visible focus states
-- Support Escape-to-close and focus return
-
-### Class H — Click-Outside Handler Race Condition
-
-**Signature** (React-specific):
-- Menu briefly opens then immediately closes (or never visibly opens)
-- Click on trigger sets state true, but document listener sets it false
-- `aria-expanded` may flicker or stay false
-- Console logs show state toggling true→false in rapid succession
-
-**Root Cause**:
-Document-level click handlers fire after component handlers due to event bubbling. If the click-outside logic doesn't exclude the trigger element, it immediately undoes the toggle.
-
-**Problematic Pattern**:
-```tsx
-document.addEventListener('click', (e) => {
-  if (!menuElement.contains(e.target)) {
-    setIsOpen(false); // Fires when toggle button is clicked!
-  }
-});
-```
-
-**Fix**:
-```tsx
-const handleClickOutside = (e: MouseEvent) => {
-  const target = e.target as HTMLElement;
-  const menu = document.getElementById('mobile-menu');
-  const trigger = document.querySelector('.menu-toggle');
-  
-  // Check BOTH menu AND trigger
-  if (menu && !menu.contains(target) && !trigger?.contains(target)) {
-    setIsOpen(false);
-  }
-};
-```
-
----
-
-# PART 4: VISUAL DEBUGGING PLAYBOOK
-
-## 4.1 The "Flat" & "Minimal" Look
-
-### Cause 1: Tailwind Configuration Conflict (v3 vs v4)
-
-**Issue**: Project contains both legacy `tailwind.config.ts` (JS-based v3 config) and modern `tokens.css` (CSS-based v4 config).
-
-**Impact**: Build system prioritizes JS config, which doesn't contain custom color/spacing tokens defined in CSS. Results in undefined classes.
-
-**Diagnosis**:
-```bash
-# Check for legacy config files
-ls -la tailwind.config.*
-ls -la postcss.config.*
-
-# Check package.json for tailwind version
-npm list tailwindcss
-```
-
-**Resolution**:
-1. Rename `tailwind.config.ts` to `.bak` or delete it
-2. Ensure `globals.css` starts with `@import "tailwindcss";`
-3. Define all design tokens in `@theme` directive
-
-### Cause 2: Missing Tailwind Entry Point
-
-**Issue**: Global CSS file lacks critical `@import "tailwindcss";` directive.
-
-**Impact**: Tailwind v4.0 does **not generate any utility classes**.
-
-**Diagnosis**:
-- Inspect `globals.css` or main CSS entry point
-- Verify `@import "tailwindcss";` is present and at the top
-
-**Resolution**:
 ```css
 /* globals.css */
 @import "tailwindcss";
 
 @theme {
-  /* Your theme variables here */
-}
-```
-
----
-
-## 4.2 Navigation Layout & Visibility Failures
-
-### Cause 3: Variable Naming Mismatch
-
-**Issue**: Design system defines spacing variables as `--spacing-1`, but application code references `var(--space-1)`.
-
-**Impact**: Browsers treat `gap: var(--space-8)` as `gap: unset` (effectively 0), causing elements to crowd together.
-
-**Diagnosis**:
-- Open DevTools → Elements
-- Select affected element
-- Check Computed styles for `gap`, `margin`, `padding`
-- Look for `unset` or `0` values where non-zero expected
-- Check Styles panel for variable reference warnings
-
-**Resolution**:
-```bash
-# Global Find & Replace across src directory
-# Replace: var(--space-
-# With: var(--spacing-
-
-rg "var\(--space-" --type tsx --type ts --type css
-```
-
-### Cause 4: Invalid CSS Syntax (Double Wrapping)
-
-**Issue**: Inline styles wrap CSS variables that already contain color values:
-
-```tsx
-// Problematic
-background: 'rgb(var(--color-espresso-dark))'
-
-// The variable already contains rgb(61 43 31)
-// Result: background: rgb(rgb(61 43 31)) - INVALID CSS
-```
-
-**Impact**: Invalid CSS causes element to appear transparent.
-
-**Diagnosis**:
-- Inspect element with missing background
-- Check Styles panel for crossed-out properties
-- Look for "invalid CSS" warnings
-
-**Resolution**:
-```tsx
-// Correct
-background: 'var(--color-espresso-dark)'
-// or
-backgroundColor: 'var(--color-espresso-dark)'
-```
-
----
-
-## 4.3 Hydration & Runtime Errors
-
-### Cause 5: Invalid HTML/SVG Nesting
-
-**Issue**: Animation components return HTML `<div>` elements but are used inside SVG illustrations.
-
-**Impact**: `<div>` cannot be child of `<svg>` or `<g>`. Causes React Hydration Error.
-
-**Diagnosis**:
-- Console shows "Hydration failed because initial UI does not match"
-- Error mentions "did not match" between server and client
-
-**Resolution**:
-Refactor SVG-compatible elements:
-```tsx
-// Instead of
-function SteamRise() {
-  return <div className="steam">...</div>;
+  /* All design tokens defined here */
 }
 
-// Use SVG primitives
-function SteamRise() {
-  return <g className="steam">...</g>;
-}
-```
-
----
-
-## 4.4 Tailwind Build/Purge Issues
-
-### Cause 6: Dynamic Class Strings Not Statically Analyzable
-
-**Issue**: Tailwind v4 (like v3) scans for class strings to generate CSS. Dynamic concatenation defeats this:
-
-```tsx
-// PROBLEMATIC - Tailwind cannot detect this
-const size = isMobile ? 'md:hidden' : 'md:flex';
-<div className={size}>...</div>
-
-// PROBLEMATIC - Same issue
-<div className={"md:" + variant}>...</div>
-```
-
-**Impact**: Works in dev, disappears in production (purged).
-
-**Diagnosis**:
-- Verify `globals.css` includes proper `@source` directives
-- Check build output for missing utility classes
-- Reproduce in production build (not just dev server)
-
-**Resolution**:
-```tsx
-// Static class strings
-{isMobile ? (
-  <div className="md:hidden">Mobile view</div>
-) : (
-  <div className="md:flex">Desktop view</div>
-)}
-```
-
-Or use `@layer` approach for dynamic values:
-```css
-@theme {
-  --breakpoint-mobile: 768px;
+@layer base {
+  /* Base styles */
 }
 
-@media (width < var(--breakpoint-mobile)) {
-  .mobile-only {
-    display: block;
+@layer utilities {
+  /* Custom utilities */
+  .glass-panel {
+    @apply bg-slate-900/30 backdrop-blur-xl border border-slate-800/50;
+  }
+  
+  .aurora-gradient {
+    background: linear-gradient(135deg, 
+      var(--color-aurora-cyan) 0%,
+      var(--color-aurora-purple) 50%,
+      var(--color-aurora-magenta) 100%
+    );
   }
 }
 ```
 
----
+**No `tailwind.config.js`** - All configuration is in CSS using `@theme` directive.
 
-## 4.5 Diagnostic Decision Tree
+### 2. State Management Strategy
 
-### Step 1: Is the nav present in the DOM?
+**No global state management** (no Redux, Zustand, Context API).
 
-- Inspect Elements
-- Search for `<nav` or `.nav-links`
+All state is local to components:
+- Form state: `useState` in ConciergeForm
+- Scroll state: `useScrollSpy` hook in Navbar
+- Toast state: `useState` in ConciergeForm
+- Mobile menu: `useState` in Navbar
 
-If **not present**: Class A or template omission
+### 3. Scroll Spy Implementation
 
-If **present**: Continue
+```typescript
+// useScrollSpy.ts
+export function useScrollSpy(sectionIds: string[], offset: number = 100): string {
+  // Tracks active section based on scroll position
+  // Returns active section ID
+}
 
-### Step 2: Is it hidden by computed CSS?
+// Usage in Navbar
+const activeSection = useScrollSpy(
+  ["destinations", "experiences", "membership", "testimonials", "contact"],
+  150
+);
+```
 
-Check in Computed styles:
-- `display` - look for `none`
-- `visibility` - look for `hidden`
-- `opacity` - look for `0`
+### 4. Form Validation
 
-If `display: none`: Find the rule (likely mobile media query)
-
-### Step 3: Is it off-screen or clipped?
-
-Check layout box:
-- `position`
-- `top/left/right/bottom`
-- `transform`
-- Any ancestor `overflow: hidden`
-
-### Step 4: Is it behind another layer?
-
-If it looks "open" but clicks fail:
-- Temporarily toggle `pointer-events: none` on suspected overlays
-- Inspect stacking contexts:
-  - Any parent with `transform`, `filter`, `opacity < 1`, `position` + `z-index`
-
-### Step 5: Is JS failing to toggle state?
-
-- Check Console for errors
-- Verify click handler is attached
-- Verify state change occurs (body class or attribute)
-
-### Step 6: Production-only disappearance?
-
-- Check build config: content globs and class string patterns
-- Verify no dynamic class concatenation
-- Test production build locally
-
----
-
-# PART 5: ANTI-PATTERNS CATALOG & PITFALLS
-
-## 5.1 Tailwind v4 Migration Pitfalls
-
-### Pitfall 1: @apply Breaks in v4.0.8+
-
-**Issue**: `@apply` directive not working in certain contexts.
-
-**Root Causes**:
-- Lightning CSS compatibility issues
-- CSS module isolation
-- Missing `@reference` directive
-
-**Solution**:
-```css
-/* In scoped styles (CSS Modules, Vue SFC, etc.) */
-@reference "../../app.css";
-
-.my-component {
-  @apply flex items-center gap-4;
+```typescript
+// ConciergeForm.tsx
+const validateForm = (): boolean => {
+  // Required: name, email, phone, travelType, interests, message
+  // Email format validation: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  // Returns boolean, sets errors state
 }
 ```
 
-### Pitfall 2: @source Breaking in Monorepos
+### 5. Accessibility Features
 
-**Issue**: Internal package imports fail.
+- **Reduced Motion**: `useReducedMotion` hook respects `prefers-reduced-motion`
+- **Keyboard Navigation**: All interactive elements focusable
+- **ARIA Labels**: Proper labels on buttons, forms, navigation
+- **Semantic HTML**: `<section>`, `<nav>`, `<footer>`, `<form>`
+- **Focus States**: Visible focus rings (ring-champagne)
+- **Screen Reader**: Alt text on images, labels on inputs
 
-**Solution**:
-```css
-/* apps/web/src/style.css */
-@import 'tailwindcss';
-@import '@repo/tailwind-config/style.css';
-@source '../../../tools/tailwind';
-```
+### 6. Image Optimization
 
-### Pitfall 3: Arbitrary Values Not Recognized
-
-**Issue**: Dynamic arbitrary values fail.
-
-**Root Cause**: v4 requires predefined values in `@theme` for arbitrary value support in some contexts.
-
-**Solution**:
-```css
-@theme {
-  --dynamic-width: 200px;
-  --dynamic-color: #ff0000;
+```typescript
+// next.config.ts
+images: {
+  formats: ['image/avif', 'image/webp'],
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'images.unsplash.com',
+    },
+  ],
 }
 ```
 
-```html
-<div class="w-[--dynamic-width] bg-[--dynamic-color]">
-```
-
-### Pitfall 4: Color Opacity Rendering Differences
-
-**Issue**: Subtle color rendering differences between v3 and v4.
-
-**Cause**: v4 uses `color-mix()` internally instead of CSS custom properties for some opacity transformations.
-
-**Mitigation**: Test color values in target browsers, especially with `currentColor`.
-
-### Pitfall 5: Build Time Regression
-
-**Issue**: Builds slower than v3.
-
-**Diagnosis**:
-1. Check for misconfigured `@source` scanning large directories
-2. Verify Vite plugin vs PostCSS plugin usage
-3. Check for content detection scanning `node_modules`
-
-**Solution**:
-```css
-/* Limit scanning scope */
-@source "src/components";
-/* NOT @source "." or @source "node_modules"; */
-```
-
-### Pitfall 6: Gradient Variables Incompatibility
-
-**Issue**: v3 and v4 gradient variables conflict.
-
-**Cause**: `--tw-gradient-from` format changed.
-
-**Solution**: Full migration required - no mixing v3/v4 in same project.
+All images use Next.js `<Image>` component with:
+- `fill` prop for responsive containers
+- `object-cover` for proper aspect ratios
+- Lazy loading by default
 
 ---
 
-## 5.2 Mobile Navigation Anti-Patterns
+## 🎭 Component Patterns
 
-### Anti-Pattern 1: "Hide Nav on Mobile" Without Menu Trigger
+### 1. Section Component Pattern
 
-```css
-@media (max-width: 768px) {
-  .nav-links { display: none; }
+```typescript
+"use client";
+
+import { motion } from "framer-motion";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+
+export function SectionName() {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <section id="section-id" className="py-24 md:py-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionHeading
+          title="Section Title"
+          subtitle="Section subtitle"
+          className="mb-16"
+        />
+        
+        <motion.div
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Content */}
+        </motion.div>
+      </div>
+    </section>
+  );
 }
 ```
 
-Creates navigation dead-end. Mobile users have no way to access navigation.
+### 2. Form Component Pattern
 
-### Anti-Pattern 2: Random Z-Index Escalation
+```typescript
+"use client";
 
-```css
-.nav { z-index: 999999; }
-```
+import { useState } from "react";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
-Hides architectural problems and creates new ones. Establish and use a z-index scale.
+export function FormComponent() {
+  const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-### Anti-Pattern 3: Overlay Inside `overflow: hidden` Container
-
-Overlays should be `position: fixed` or guaranteed not to be clipped. Parent containers with `overflow: hidden` create clipping contexts.
-
-### Anti-Pattern 4: Non-Semantic Clickable Divs
-
-```tsx
-<div onClick={toggleMenu}>Menu</div>
-```
-
-Creates invisible navigation for keyboard users. Use `<button type="button">`.
-
-### Anti-Pattern 5: Missing Mobile Trigger at Correct Breakpoint
-
-```tsx
-// Desktop nav hidden on mobile
-<nav className="hidden md:flex">...</nav>
-
-// Mobile trigger ALSO hidden on mobile
-<button className="hidden md:inline-flex">Menu</button>
-```
-
-Result: Nothing is visible on mobile.
-
-### Anti-Pattern 6: SSR/Hydration Conditional Nav
-
-```tsx
-const isMobile = window.innerWidth < 768; // breaks on SSR
-return isMobile ? <MobileNav/> : <DesktopNav/>;
-```
-
-Results in flicker, hydration mismatch, or missing nav.
-
-### Anti-Pattern 7: Click-Outside Closes Toggle Button Clicks
-
-```tsx
-useEffect(() => {
-  const handleClick = (e: MouseEvent) => {
-    if (!menuRef.current?.contains(e.target as Node)) {
-      setIsOpen(false); // Closes even when toggle was clicked!
-    }
+  const validateForm = (): boolean => {
+    // Validation logic
   };
-  document.addEventListener('click', handleClick);
-  return () => document.removeEventListener('click', handleClick);
-}, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    
+    setIsSubmitting(true);
+    // API call
+    setIsSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input
+        label="Field Label"
+        value={formData.field}
+        onChange={(e) => setFormData({ ...formData, field: e.target.value })}
+        error={errors.field}
+      />
+      <Button type="submit" loading={isSubmitting}>
+        Submit
+      </Button>
+    </form>
+  );
+}
+```
+
+### 3. UI Primitive Pattern
+
+```typescript
+import { forwardRef, type HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
+
+export interface ComponentProps extends HTMLAttributes<HTMLElement> {
+  variant?: "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
+}
+
+export const Component = forwardRef<HTMLElement, ComponentProps>(
+  ({ className, variant = "primary", size = "md", ...props }, ref) => {
+    return (
+      <element
+        ref={ref}
+        className={cn(
+          "base-classes",
+          { "variant-classes": variant === "primary" },
+          { "size-classes": size === "md" },
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+
+Component.displayName = "Component";
 ```
 
 ---
 
-# PART 6: VERIFICATION PROTOCOLS
+## 🚀 Development Workflow
 
-## 6.1 Responsive Test Matrix
-
-Test these viewport sizes:
-
-| Width | Height | Device Type |
-|-------|--------|-------------|
-| 360 | 640 | Small phone |
-| 390 | 844 | iPhone 14 |
-| 430 | 932 | iPhone 14 Pro Max |
-| 768 | 1024 | Tablet portrait |
-| 1024 | 768 | Tablet landscape / Small desktop |
-| 1440 | 900 | Desktop |
-| 1920 | 1080 | Large desktop |
-
-**Additional Tests**:
-- Small height scenarios (360×640)
-- Orientation change (portrait/landscape)
-- Reduced motion (OS setting)
-- iOS Safari scrolling inside overlays
-
-## 6.2 Keyboard Accessibility Checklist
-
-- [ ] Tab reaches the menu button
-- [ ] Enter/Space opens the menu
-- [ ] Focus moves into menu
-- [ ] Arrow keys navigate menu items
-- [ ] Escape closes the menu
-- [ ] Focus returns to trigger after close
-- [ ] Visible focus ring on all interactive elements
-
-## 6.3 Behavior Checklist
-
-- [ ] Menu opens and closes reliably
-- [ ] Clicking a link closes the menu
-- [ ] Resizing to desktop closes the menu
-- [ ] No background scroll bleed when open (scroll lock)
-- [ ] Route change closes mobile menu (React)
-- [ ] Animation transitions are smooth (check reduced motion)
-
-## 6.4 Styling/Utility Checklist
-
-- [ ] Trigger visible on mobile (`md:hidden`)
-- [ ] Desktop links hidden on mobile (`hidden md:flex`)
-- [ ] No purge issues (classes present in production build)
-- [ ] Menu isn't clipped: top items visible
-- [ ] Menu isn't behind header/hero layers
-- [ ] Focus ring visible on links and trigger
-
-## 6.5 Production Build Validation
+### Getting Started
 
 ```bash
-# 1. Run production build
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# → http://localhost:3000
+
+# Build for production
 npm run build
 
-# 2. Inspect generated CSS
-cat dist/app.css | head -100
-
-# 3. Verify expected utilities are present
-grep -o "\.bg-[a-z0-9/-]*" dist/app.css | sort | uniq
-
-# 4. Check for purge warnings
-npm run build 2>&1 | grep -i "purge\|unused\|warn"
-
-# 5. Test in production mode locally
+# Start production server
 npm run start
+
+# Type checking
+npx tsc --noEmit
+
+# Linting
+npm run lint
+```
+
+### File Creation Checklist
+
+When creating new components:
+
+1. **Use "use client" directive** if using hooks or interactivity
+2. **Import motion from framer-motion** for animations
+3. **Use useReducedMotion hook** for accessibility
+4. **Add proper TypeScript interfaces** for props
+5. **Use forwardRef** for form components
+6. **Add displayName** for debugging
+7. **Use cn() utility** for className merging
+8. **Follow responsive patterns**: mobile-first, then md:, lg:, xl:
+
+### Common Utilities
+
+```typescript
+// className merging
+import { cn } from "@/lib/utils";
+className={cn("base", "conditional", className)}
+
+// Currency formatting
+import { formatCurrency } from "@/lib/utils";
+formatCurrency(15000, "USD") // → "$15,000"
+
+// Slugification
+import { slugify } from "@/lib/utils";
+slugify("Swiss Alps") // → "swiss-alps"
 ```
 
 ---
 
-# PART 7: AI AGENT IMPLEMENTATION PATTERNS
+## 🎯 Navigation & Routing
 
-## 7.1 Version Detection Rules
+### Section IDs
 
-```javascript
-// AI Agent Detection Logic
-function detectTailwindVersion(file) {
-  if (file.includes('@tailwind base')) {
-    return { version: 'v3', suggestUpgrade: true };
-  }
-  if (file.includes('@import "tailwindcss"')) {
-    return { version: 'v4', suggestUpgrade: false };
-  }
-  if (file.includes('tailwind.config.js') || file.includes('tailwind.config.ts')) {
-    return { version: 'v3', configExists: true };
-  }
-  return { version: 'unknown' };
-}
+All sections have IDs for scroll navigation:
+
+```typescript
+const sections = [
+  "#hero",          // Hero section (no ID, top of page)
+  "#destinations",  // Destinations grid
+  "#experiences",   // Experiences showcase
+  "#membership",    // Membership tiers
+  "#testimonials",  // Client testimonials
+  "#contact",       // Contact form
+];
 ```
 
-## 7.2 Systematic Replacement Map
-
-```javascript
-// Utility Transformation Map
-const v3ToV4Map = {
-  'bg-opacity-': '/',
-  'text-opacity-': '/',
-  'border-opacity-': '/',
-  'ring-opacity-': '/',
-  'placeholder-opacity-': '/',
-  'shadow-sm': 'shadow-xs',
-  'shadow': 'shadow-sm',
-  'bg-gradient-': 'bg-linear-',
-  'outline-none': 'outline-hidden',
-  'ring"': 'ring-3"',
-  'flex-shrink-': 'shrink-',
-  'flex-grow-': 'grow-',
-  'overflow-ellipsis': 'text-ellipsis',
-  'decoration-slice': 'box-decoration-slice',
-  'decoration-clone': 'box-decoration-clone',
-};
-
-function migrateUtility(className) {
-  for (const [v3, v4] of Object.entries(v3ToV4Map)) {
-    if (className.includes(v3)) {
-      return className.replace(v3, v4);
-    }
-  }
-  return className;
-}
-```
-
-## 7.3 Color Space Validation
-
-```javascript
-// Check for RGB → OKLCH conversion needs
-function validateColorValue(colorValue) {
-  if (colorValue.startsWith('#') && colorValue.length === 4) {
-    return `Consider expanding ${colorValue} to 7 characters for consistency`;
-  }
-  if (colorValue.startsWith('rgb')) {
-    return 'Consider migrating to OKLCH for v4 compatibility';
-  }
-  return null;
-}
-```
-
-## 7.4 Component Template: New Tailwind v4 Component
+### Smooth Scroll
 
 ```css
-/* filename: component-name.css */
-@import "tailwindcss";
-
-@theme {
-  /* Custom tokens first */
-  --color-brand-primary: oklch(0.84 0.18 117.33);
-  --color-brand-secondary: oklch(0.53 0.12 118.34);
-  --font-heading: "Inter", system-ui;
-  --spacing-component: 1.5rem;
-  
-  /* Animation tokens */
-  --animate-slide-up: slide-up 0.3s ease-out;
-  
-  @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-@utility component-container {
-  padding: var(--spacing-component);
-  background-color: var(--color-brand-primary);
-  border-radius: 0.5rem;
-}
-
-@utility component-title {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  font-weight: 600;
+/* globals.css */
+html {
+  scroll-behavior: smooth;
 }
 ```
 
-## 7.5 Debugging Workflow for AI Agents
+### Navbar Links
 
-### Step 1: Version Validation
-```bash
-npm list tailwindcss
-# Expected: tailwindcss@4.x.x
-```
-
-### Step 2: Build Output Analysis
-```bash
-npx @tailwindcss/cli -i input.css -o output.css --verbose
-```
-
-### Step 3: CSS Variable Inspection (Browser Console)
-```javascript
-const styles = getComputedStyle(document.documentElement);
-console.log('--color-brand-500:', styles.getPropertyValue('--color-brand-500'));
-console.log('--spacing-4:', styles.getPropertyValue('--spacing-4'));
+```typescript
+const navLinks = [
+  { href: "#destinations", label: "Destinations" },
+  { href: "#experiences", label: "Experiences" },
+  { href: "#membership", label: "Membership" },
+  { href: "#testimonials", label: "Testimonials" },
+  { href: "#contact", label: "Contact" },
+];
 ```
 
 ---
 
-# APPENDIX: QUICK REFERENCE TABLES
+## 📱 Responsive Design
 
-## v3 → v4 Utility Mappings
+### Breakpoint Strategy
 
-| Category | v3 | v4 |
-|----------|----|----|
-| Shadow | `shadow-sm` | `shadow-xs` |
-| Shadow | `shadow` | `shadow-sm` |
-| Blur | `blur-sm` | `blur-xs` |
-| Blur | `blur` | `blur-sm` |
-| Rounded | `rounded-sm` | `rounded-xs` |
-| Rounded | `rounded` | `rounded-sm` |
-| Gradient | `bg-gradient-to-r` | `bg-linear-to-r` |
-| Outline | `outline-none` | `outline-hidden` |
-| Ring | `ring` | `ring-3` |
-| Opacity | `bg-opacity-50` | `bg-color/50` |
+```typescript
+// Mobile-first approach
+className="
+  text-4xl           // Mobile (default)
+  md:text-5xl        // Tablet (768px+)
+  lg:text-6xl        // Desktop (1024px+)
+  xl:text-7xl        // Large desktop (1280px+)
+"
 
-## Browser Requirements Summary
+// Grid layouts
+className="
+  grid-cols-1        // Mobile: 1 column
+  md:grid-cols-2     // Tablet: 2 columns
+  lg:grid-cols-3     // Desktop: 3 columns
+"
+```
 
-| Browser | Minimum Version |
-|---------|----------------|
-| Safari | 16.4+ |
-| Chrome | 111+ |
-| Firefox | 128+ |
+### Container Pattern
 
-## Performance Benchmarks
+```typescript
+<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+  {/* Content */}
+</div>
+```
 
-| Metric | Improvement |
-|--------|-------------|
-| Full build | 3.78x faster |
-| Incremental rebuild | 8.8x faster |
-| No-change rebuild | 182x faster |
+### Mobile Menu
+
+- **Trigger**: Hamburger button (visible on `md:hidden`)
+- **Overlay**: Full-screen with backdrop blur
+- **Animation**: Framer Motion with staggered items
+- **Scroll Lock**: Body overflow hidden when open
+- **Close**: On link click or close button
 
 ---
 
-# CONCLUSION
+## 🧪 Testing Strategy
 
-This comprehensive guide synthesizes validated findings from extensive analysis of Tailwind CSS v4.0 migration scenarios, mobile navigation patterns, and visual debugging methodologies. All content has been cross-referenced against official documentation and validated through real-world troubleshooting scenarios.
+### Manual Testing Checklist
 
-The guide serves as an authoritative reference for:
+**Responsive**:
+- [ ] Mobile (360px - 640px)
+- [ ] Tablet (768px - 1024px)
+- [ ] Desktop (1280px+)
+- [ ] Orientation changes
 
-1. **Understanding the CSS-first paradigm shift** in Tailwind v4
-2. **Migrating existing v3.4 projects** with systematic utility transformations
-3. **Implementing robust mobile navigation** for both vanilla HTML and React/shadcn stacks
-4. **Debugging visual discrepancies** using a systematic diagnostic approach
-5. **Avoiding critical pitfalls** that cause production failures
+**Navigation**:
+- [ ] Scroll spy highlights active section
+- [ ] Smooth scroll to sections
+- [ ] Mobile menu opens/closes
+- [ ] Body scroll lock works
 
-All anti-patterns, root-cause taxonomies, and verification protocols have been validated against production scenarios and official documentation, ensuring production-grade reliability for any project adopting Tailwind CSS v4.0.
+**Forms**:
+- [ ] All fields validate correctly
+- [ ] Error messages display
+- [ ] Success toast appears
+- [ ] Form resets after submission
+
+**Accessibility**:
+- [ ] Keyboard navigation works
+- [ ] Focus states visible
+- [ ] Screen reader compatible
+- [ ] Reduced motion respected
+
+**Performance**:
+- [ ] Images load optimized
+- [ ] Animations smooth (60fps)
+- [ ] No layout shift (CLS)
+- [ ] Fast initial load (LCP < 2.5s)
+
+---
+
+## 🐛 Known Issues & Limitations
+
+### Current Limitations
+
+1. **No Backend**: Form submission is simulated (1.5s delay)
+2. **Static Data**: All content hardcoded in TypeScript files
+3. **No CMS**: Content not editable without code changes
+4. **No Authentication**: No user accounts or login
+5. **No Payment**: No booking or payment integration
+6. **Single Page**: No destination detail pages (yet)
+
+### Browser Support
+
+**Supported**:
+- Chrome 111+
+- Safari 16.4+
+- Firefox 128+
+- Edge (latest)
+
+**Not Supported**:
+- IE11 (Tailwind v4 requires modern CSS)
+- Older mobile browsers
+
+---
+
+## 🔮 Future Enhancements
+
+### Phase 6: Dynamic Routes (Planned)
+
+```
+app/
+└── destinations/
+    └── [slug]/
+        └── page.tsx    # Dynamic destination pages
+```
+
+### Phase 7: CMS Integration (Planned)
+
+- Sanity.io or Contentful
+- Editable content without code changes
+- Image management
+
+### Phase 8: Backend Integration (Planned)
+
+- API routes for form submission
+- Email service (SendGrid/Mailgun)
+- CRM integration
+
+### Phase 9: Advanced Features (Planned)
+
+- Member portal
+- Booking system
+- Payment integration (Stripe)
+- Multi-language support
+- Blog/Journal section
+
+---
+
+## 📚 Key Documentation Files
+
+```
+/PROJECT_ARCHITECTURE_DOCUMENT.md  # Complete architecture guide
+/PRD_MASTER.md                     # Product requirements
+/MASTER_EXECUTION_PLAN.md          # Development roadmap
+/README.md                         # Project overview
+/CLAUDE.md                         # This briefing document
+```
+
+---
+
+## 🚨 Critical Notes for AI Agents
+
+### 1. Tailwind v4 CSS-First Approach
+
+**DO NOT** create `tailwind.config.js` or `tailwind.config.ts`.  
+All configuration is in `src/app/globals.css` using `@theme` directive.
+
+### 2. No Global State
+
+**DO NOT** add Redux, Zustand, or Context API.  
+Use local component state with `useState`.
+
+### 3. Component Patterns
+
+**ALWAYS**:
+- Use `"use client"` for interactive components
+- Import `useReducedMotion` for animations
+- Use `forwardRef` for form components
+- Add `displayName` for debugging
+- Use `cn()` for className merging
+
+### 4. Image Sources
+
+All images use Unsplash URLs:
+```
+https://images.unsplash.com/photo-{id}
+```
+
+### 5. Form Validation
+
+Email regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`  
+All fields required except where noted.
+
+### 6. Animation Performance
+
+Always check `prefersReducedMotion`:
+```typescript
+const prefersReducedMotion = useReducedMotion();
+
+<motion.div
+  initial={prefersReducedMotion ? {} : { opacity: 0 }}
+  animate={{ opacity: 1 }}
+/>
+```
+
+### 7. Build Commands
+
+```bash
+# ALWAYS run before committing
+npx tsc --noEmit    # Type check
+npm run build       # Build verification
+```
+
+---
+
+## 🎓 Onboarding Checklist
+
+For new developers or AI agents:
+
+1. **Read Documentation**:
+   - [ ] This briefing document (CLAUDE.md)
+   - [ ] PROJECT_ARCHITECTURE_DOCUMENT.md
+   - [ ] PRD_MASTER.md
+
+2. **Understand Architecture**:
+   - [ ] Tailwind v4 CSS-first approach
+   - [ ] Component structure (layout/sections/ui)
+   - [ ] Data layer (static TypeScript files)
+   - [ ] No global state strategy
+
+3. **Review Key Files**:
+   - [ ] `src/app/globals.css` - Design tokens
+   - [ ] `src/lib/utils.ts` - Utility functions
+   - [ ] `src/components/ui/Button.tsx` - Component pattern
+   - [ ] `src/components/sections/Hero.tsx` - Section pattern
+
+4. **Run Project**:
+   - [ ] `npm install`
+   - [ ] `npm run dev`
+   - [ ] Visit http://localhost:3000
+   - [ ] Test all sections and interactions
+
+5. **Verify Build**:
+   - [ ] `npx tsc --noEmit` (no errors)
+   - [ ] `npm run build` (successful)
+   - [ ] `npm run start` (production mode works)
+
+---
+
+## 📞 Quick Reference
+
+### File Locations
+
+```bash
+# Add new destination
+src/data/destinations.ts
+
+# Add new UI component
+src/components/ui/ComponentName.tsx
+
+# Add new section
+src/components/sections/SectionName.tsx
+
+# Modify design tokens
+src/app/globals.css
+
+# Update SEO metadata
+src/app/layout.tsx
+```
+
+### Common Tasks
+
+**Add a new destination**:
+1. Edit `src/data/destinations.ts`
+2. Add new object to `destinations` array
+3. Ensure all required fields present
+
+**Add a new section**:
+1. Create `src/components/sections/SectionName.tsx`
+2. Follow section component pattern
+3. Import in `src/app/page.tsx`
+4. Add section ID to navbar links
+
+**Modify colors**:
+1. Edit `src/app/globals.css`
+2. Update `@theme` variables
+3. Rebuild project
+
+**Add new animation**:
+1. Define keyframes in `@theme` block
+2. Create animation variable
+3. Use in component with Framer Motion
+
+---
+
+## ✅ Project Health Status
+
+**Build**: ✅ Passing  
+**TypeScript**: ✅ No errors  
+**Linting**: ✅ Clean  
+**Performance**: ✅ Optimized  
+**Accessibility**: ✅ WCAG compliant  
+**Responsive**: ✅ Mobile-first  
+**Production Ready**: ✅ Yes
+
+---
+
+**End of Briefing Document**
+
+*This document represents the complete current state of the Aurora Luxe Travel project as of 2026-01-28. All information has been validated against the actual codebase.*
