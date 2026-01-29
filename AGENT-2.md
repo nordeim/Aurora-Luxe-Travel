@@ -1,108 +1,52 @@
-Aurora Luxe Travel — Project Overview
-
-This is Aurora Luxe Travel, a luxury travel concierge website targeting ultra-high-net-worth individuals (UHNWI). It features a distinctive "Celestial Noir" design aesthetic that merges deep space aesthetics with terrestrial luxury.
-
-🎯 Core Concept
-
-A premium travel booking experience showcasing curated destinations (Maldives, Tokyo, Swiss Alps, Dubai, Serengeti, Amalfi Coast), signature experiences (private jets, yachts, Michelin dining), and membership tiers for VIP clients.
-
-🛠 Tech Stack
-
- Category        Technology
- Framework       Next.js 16.1.4 (App Router)
- UI Library      React 19.2.3
- Language        TypeScript 5.9.3 (strict mode)
- Styling         Tailwind CSS 4.0 (CSS-first config)
- Animation       Framer Motion 12.29.0
- UI Components   Radix UI primitives (shadcn/ui pattern)
- Icons           Lucide React, Heroicons
- Forms           React Hook Form + Zod
- Database        Prisma 7.3.0 + PostgreSQL
- Testing         Vitest 4.0.18, Playwright 1.57.0
- Linting         ESLint 9.39.2
-
-🎨 Design System — "Celestial Noir"
-
-Color Palette:
-
-• Void Blacks: #050506 (deep space), #0a0a0c
-• Aurora Gradients: Cyan → Purple → Magenta
-• Luxury Accent: Champagne gold #c9b896
-• Slate Scale: 50-900 for text/borders
-
-Typography:
-
-• Headlines: Instrument Serif (elegant serif)
-• Body: Geist (modern sans-serif)
-
-Key Visual Effects:
-
-• Glass morphism panels (backdrop-blur-xl)
-• Animated aurora blobs floating in background
-• Smooth scroll behavior with scroll spy navigation
-
-📁 Project Structure
-
-src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # Root layout with fonts/SEO
-│   ├── page.tsx            # Home page composition
-│   └── globals.css         # Tailwind v4 theme tokens
-│
-├── components/
-│   ├── layout/             # Navbar (sticky, scroll spy), Footer
-│   ├── sections/           # Hero, Destinations, Experiences,
-│   │                       # Membership, Testimonials, ConciergeForm
-│   └── ui/                 # Button, Input, Select, Textarea,
-│                           # GlowOrb, GlassPanel, Toast, ChipGroup
-│
-├── data/                   # Static content
-│   ├── destinations.ts     # 6 luxury destinations
-│   ├── experiences.ts      # 5 signature experiences
-│   ├── membership.ts       # 3 membership tiers
-│   └── testimonials.ts     # Client testimonials
-│
-├── lib/
-│   ├── utils.ts            # cn(), formatCurrency(), slugify()
-│   └── hooks/              # useScrollSpy, useReducedMotion
-
-✨ Key Features
-
- Feature              Implementation
- 6 Destinations       Maldives, Tokyo, Swiss Alps, Dubai, Serengeti, Amalfi
- 5 Experiences        Private Jet, Yacht Charter, Michelin Trail, Desert Stargazing, Alpine Wellness
- 3 Membership Tiers   Silver Circle → Black Card → Obsidian Society
- Scroll Spy Nav       Highlights active section as you scroll
- Mobile Menu          Full-screen overlay with staggered animations
- Form Validation      Contact form with Zod validation + toast notifications
- Accessibility        WCAG AAA, keyboard nav, reduced motion support
- Animations           Framer Motion with useReducedMotion hook
-
-🚀 Current Status
-
-✅ Production Ready — All 5 implementation phases complete:
-
-1. ✅ Foundation (Tailwind v4, fonts, utilities)
-2. ✅ Data Layer (destinations, experiences, membership, testimonials)
-3. ✅ UI Primitives (Button, Input, forms, etc.)
-4. ✅ Layout Components (Navbar, Footer, scroll spy)
-5. ✅ Section Components (Hero, Destinations, Experiences, Membership, Testimonials, Form)
-
-📝 Available Scripts
-
-npm run dev       # Start dev server (Turbopack)
-npm run build     # Build for production
-npm run start     # Start production server
-npm run lint      # ESLint checking
-npm test          # Run Vitest tests
-
-🔮 Future Roadmap
-
-• Phase 6: Dynamic destination detail pages (/destinations/[slug])
-• Phase 7: CMS integration (Sanity/Contentful)
-• Phase 8: Backend API + email service integration
-• Phase 9: Member portal + booking system + payments
-
-This is a meticulously crafted luxury brand website with a unique visual identity, production-ready code quality, and a clear path for future enhancements. The "Celestial Noir" aesthetic sets it apart from generic travel sites with it
-s deep space meets luxury aesthetic.
-
+Aurora Luxe Travel is a sophisticated luxury travel concierge website targeting ultra-high-net-worth individuals (UHNWI). Here's what I found:                                                                      
+                                                                                                                                                                                                                                          
+🎯 Project Overview                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                          
+Aurora Luxe Travel is a membership-based luxury travel concierge service that targets individuals with $30M+ in liquid assets. The project creates a distinctive "Celestial Noir" digital experience that merges deep space aesthetics    
+with terrestrial luxury.                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                          
+🏗 Current State                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                          
+✅ Production Ready - Phase 5 Complete                                                                                                                                                                                                    
+- Build Status: ✅ Passing                                                                                                                                                                                                                
+- TypeScript: ✅ No errors                                                                                                                                                                                                                
+- Performance: ✅ Optimized                                                                                                                                                                                                               
+- Accessibility: ✅ WCAG AAA compliant                                                                                                                                                                                                    
+- Responsive: ✅ Mobile-first                                                                                                                                                                                                             
+                                                                                                                                                                                                                                          
+📊 Key Features Implemented                                                                                                                                                                                                               
+                                                                                                                                                                                                                                          
+1. Hero Section - Full viewport with aurora animations                                                                                                                                                                                    
+2. Destinations Grid - 6 curated luxury locations (Maldives, Tokyo, Swiss Alps, Dubai, Serengeti, Amalfi)                                                                                                                                 
+3. Experiences Showcase - 5 signature offerings (Private Jet, Yacht, Michelin Trail, Desert, Alpine)                                                                                                                                      
+4. Membership Tiers - 3 levels (Silver Circle, Black Card, Obsidian Society)                                                                                                                                                              
+5. Testimonials - 3 client testimonials with ratings                                                                                                                                                                                      
+6. Concierge Form - Multi-field form with validation                                                                                                                                                                                      
+7. Navigation - Sticky navbar with scroll spy and mobile menu                                                                                                                                                                             
+                                                                                                                                                                                                                                          
+🎨 Design System                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                          
+Celestial Noir Aesthetic:                                                                                                                                                                                                                 
+- Deep space blacks (#050506)                                                                                                                                                                                                             
+- Aurora gradients (cyan, purple, magenta)                                                                                                                                                                                                
+- Champagne gold accents                                                                                                                                                                                                                  
+- Instrument Serif + Geist typography                                                                                                                                                                                                     
+- Glass morphism effects                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                          
+🎯 Business Model                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                          
+Membership-Based Concierge Service:                                                                                                                                                                                                       
+- Target: UHNWI ($30M+ net worth)                                                                                                                                                                                                         
+- Conversion: Contact form → Concierge consultation                                                                                                                                                                                       
+- Tiers: Silver Circle → Black Card → Obsidian Society                                                                                                                                                                                    
+- Offerings: Curated destinations + signature experiences                                                                                                                                                                                 
+                                                                                                                                                                                                                                          
+🚀 Technical Stack                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                          
+- Next.js 16.1.4 with React 19.2.3                                                                                                                                                                                                        
+- TypeScript 5.9.3 (strict mode)                                                                                                                                                                                                          
+- Tailwind CSS v4 (CSS-first theming)                                                                                                                                                                                                     
+- Framer Motion 12.29.0 for animations                                                                                                                                                                                                    
+- Playwright 1.57.0 for testing                                                                                                                                                                                                           
+                                                                                                                                                                                                                                          
+The project demonstrates exceptional attention to design detail, accessibility, and performance optimization, serving as a sophisticated digital platform for luxury travel services. 
